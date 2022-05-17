@@ -24,9 +24,28 @@ contract Adapter {
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts) {
-        IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
-        IERC20(path[0]).approve(address(router), amountIn);
+        IERC20 path0 = IERC20(path[0]);
+
+        path0.safeTransferFrom(msg.sender, address(this), amountIn);
+        path0.approve(address(router), amountIn);
 
         amounts = router.swapExactTokensForTokens(amountIn, amountOutMin, path, to, deadline);
+    }
+
+    function swapTokensForExactTokens(
+        uint256 amountOut,
+        uint256 amountInMax,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts) {
+        IERC20 path0 = IERC20(path[0]);
+
+        path0.safeTransferFrom(msg.sender, address(this), amountInMax);
+        path0.approve(address(router), amountInMax);
+
+        amounts = router.swapTokensForExactTokens(amountOut, amountInMax, path, to, deadline);
+
+        path0.safeTransfer(msg.sender, amountInMax - amounts[0]);
     }
 }
