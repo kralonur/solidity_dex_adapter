@@ -48,4 +48,12 @@ contract Adapter {
 
         path0.safeTransfer(msg.sender, amountInMax - amounts[0]);
     }
+
+    function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts) {
+        amounts = router.getAmountsOut(amountIn, path);
+    }
+
+    function getAmountsIn(uint256 amountOut, address[] calldata path) external view returns (uint256[] memory amounts) {
+        amounts = router.getAmountsIn(amountOut, path);
+    }
 }
