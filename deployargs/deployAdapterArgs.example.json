@@ -1,0 +1,4 @@
+{
+  "factory": "dex factory address (any dex that uses uniswapv2 contracts)",
+  "router": "dex router address (any dex that uses uniswapv2 contracts)"
+}
