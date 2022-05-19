@@ -9,6 +9,7 @@ import { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 import "solidity-coverage";
 import "./tasks/accounts";
+import "./tasks/verify";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
