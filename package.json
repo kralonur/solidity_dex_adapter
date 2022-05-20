@@ -63,6 +63,7 @@
     "deploy:adapter": "hardhat run scripts/adapter/deploy.ts",
     "verify:adapter": "hardhat verify:adapter",
     "pair": "hardhat pair",
+    "calculate": "hardhat calculate",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.yaml --ignore-path ./.eslintignore --ext .js,.ts .",
