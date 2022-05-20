@@ -17,7 +17,7 @@ main().catch(error => {
 
 async function getContract(owner: SignerWithAddress, args: any[]) {
   const factory = new Adapter__factory(owner);
-  const contract = await factory.deploy(args[0], args[1]);
+  const contract = await factory.deploy(args[0]);
   await contract.deployed();
 
   return contract;
@@ -26,12 +26,11 @@ async function getContract(owner: SignerWithAddress, args: any[]) {
 function getContractArgs() {
   const json = fs.readJSONSync("./deployargs/deployAdapterArgs.json");
 
-  const factory = String(json.factory);
   const router = String(json.router);
 
-  return getContractArgsArray(factory, router);
+  return getContractArgsArray(router);
 }
 
-function getContractArgsArray(factory: string, router: string) {
-  return [factory, router];
+function getContractArgsArray(router: string) {
+  return [router];
 }
