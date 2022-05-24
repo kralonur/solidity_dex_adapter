@@ -7,7 +7,7 @@ async function main() {
   const [owner] = await ethers.getSigners();
   const args = getContractArgs();
   const contract = await getContract(owner, args);
-  console.log("Refund deployed to: ", contract.address);
+  console.log("Adapter deployed to: ", contract.address);
 }
 
 main().catch(error => {
