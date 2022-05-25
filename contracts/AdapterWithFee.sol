@@ -80,9 +80,12 @@ contract AdapterWithFee is Ownable {
         IERC20 path0 = IERC20(path[0]);
 
         path0.safeTransferFrom(msg.sender, address(this), amountInMax);
-        path0.approve(address(router), amountInMax);
 
-        amounts = router.swapTokensForExactTokens(amountOut, amountInMax, path, to, deadline);
+        // to get amount without fee (so amount * 1) / (1 + fee) ex(%5 fee) amount / 1.05
+        uint256 amountToSendRouter = (amountInMax * _FEE_DENOMINATOR) / (_FEE_DENOMINATOR + fee);
+
+        path0.approve(address(router), amountToSendRouter);
+        amounts = router.swapTokensForExactTokens(amountOut, amountToSendRouter, path, to, deadline);
 
         uint256 feeTransfer = _getFee(amounts[0]);
         uint256 userTransfer = amountInMax - (amounts[0] + feeTransfer);
