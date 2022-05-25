@@ -18,11 +18,12 @@ task("calculateoutput", "Get pair")
     console.log(String(reserveOutputInitial));
 
     const eth = BigNumber.from("1000000000000000000");
-
-    const fee = BigNumber.from("3000000000000000");
+    const fee = BigNumber.from("3000000000000000"); //%0.3 - 0.003
+    const contractFee = BigNumber.from("50000000000000000"); //%5 - 0.05
     const multiplier = eth.sub(fee);
+    const contractFeeMultiplier = eth.sub(contractFee);
     const amount = eth.mul(1);
-    const amountWithFee = amount.mul(multiplier).div(eth);
+    const amountWithFee = amount.mul(contractFeeMultiplier).div(eth).mul(multiplier).div(eth);
     const constantProduct = reserveInputInitial.mul(reserveOutputInitial);
     const reserveOutputAfterExecution = constantProduct.div(reserveInputInitial.add(amountWithFee));
     const amountOut = reserveOutputInitial.sub(reserveOutputAfterExecution);
@@ -56,13 +57,14 @@ task("calculateinput", "Get pair")
     console.log(String(reserveOutputInitial));
 
     const eth = BigNumber.from("1000000000000000000");
-
     const fee = BigNumber.from("3000000000000000");
+    const contractFee = BigNumber.from("50000000000000000"); //%5 - 0.05
     const amountOut = eth.mul(1);
     const amountWithFee = amountOut
       .mul(eth)
       .mul(reserveInputInitial)
       .div(amountOut.sub(reserveOutputInitial).mul(fee.sub(eth)));
+    const amountWithFeeToShow = amountWithFee.mul(eth.add(contractFee)).div(eth);
     const constantProduct = reserveInputInitial.mul(reserveOutputInitial);
     const reserveOutputAfterExecution = constantProduct.div(reserveInputInitial.add(amountWithFee));
     const marketPrice = amountWithFee.mul(eth).div(amountOut); //in uniswap it's calculated without fee!
@@ -70,6 +72,7 @@ task("calculateinput", "Get pair")
     const priceImpact = eth.sub(midPrice.mul(eth).div(marketPrice));
 
     console.log(`amountWithFee: ${amountWithFee}`);
+    console.log(`amountWithFeeToShow: ${amountWithFeeToShow}`);
     console.log(`constantProduct: ${constantProduct}`);
     console.log(`reserveOutputAfterExecution: ${reserveOutputAfterExecution}`);
     console.log(`amountOut: ${amountOut}`);
