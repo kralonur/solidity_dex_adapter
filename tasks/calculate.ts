@@ -2,6 +2,8 @@ import { BigNumber } from "ethers";
 import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 
+const eth = BigNumber.from("1000000000000000000");
+
 task("calculateoutput", "Get pair")
   .addParam("pair", "Token A address")
   .addParam("from", "Swap from")
@@ -17,19 +19,14 @@ task("calculateoutput", "Get pair")
     console.log(String(reserveInputInitial));
     console.log(String(reserveOutputInitial));
 
-    const eth = BigNumber.from("1000000000000000000");
     const fee = BigNumber.from("3000000000000000"); //%0.3 - 0.003
     const contractFee = BigNumber.from("50000000000000000"); //%5 - 0.05
     const multiplier = eth.sub(fee);
     const contractFeeMultiplier = eth.sub(contractFee);
     const amount = eth.mul(1);
     const amountWithFee = amount.mul(contractFeeMultiplier).div(eth).mul(multiplier).div(eth);
-    const constantProduct = reserveInputInitial.mul(reserveOutputInitial);
-    const reserveOutputAfterExecution = constantProduct.div(reserveInputInitial.add(amountWithFee));
-    const amountOut = reserveOutputInitial.sub(reserveOutputAfterExecution);
-    const marketPrice = amountWithFee.mul(eth).div(amountOut); //in uniswap it's calculated without fee!
-    const midPrice = reserveInputInitial.mul(eth).div(reserveOutputInitial);
-    const priceImpact = eth.sub(midPrice.mul(eth).div(marketPrice));
+    const { constantProduct, reserveOutputAfterExecution, amountOut, marketPrice, midPrice, priceImpact } =
+      calculateVariables(reserveInputInitial, reserveOutputInitial, amountWithFee);
 
     console.log(`amount: ${amount}`);
     console.log(`amountWithFee: ${amountWithFee}`);
@@ -40,6 +37,16 @@ task("calculateoutput", "Get pair")
     console.log(`midPrice: ${midPrice}`);
     console.log(`priceImpact: ${priceImpact}`);
   });
+
+function calculateVariables(reserveInputInitial: BigNumber, reserveOutputInitial: BigNumber, amountWithFee: BigNumber) {
+  const constantProduct = reserveInputInitial.mul(reserveOutputInitial);
+  const reserveOutputAfterExecution = constantProduct.div(reserveInputInitial.add(amountWithFee));
+  const amountOut = reserveOutputInitial.sub(reserveOutputAfterExecution);
+  const marketPrice = amountWithFee.mul(eth).div(amountOut); //in uniswap it's calculated without fee!
+  const midPrice = reserveInputInitial.mul(eth).div(reserveOutputInitial);
+  const priceImpact = eth.sub(midPrice.mul(eth).div(marketPrice));
+  return { constantProduct, reserveOutputAfterExecution, amountOut, marketPrice, midPrice, priceImpact };
+}
 
 task("calculateinput", "Get pair")
   .addParam("pair", "Token A address")
@@ -56,7 +63,6 @@ task("calculateinput", "Get pair")
     console.log(String(reserveInputInitial));
     console.log(String(reserveOutputInitial));
 
-    const eth = BigNumber.from("1000000000000000000");
     const fee = BigNumber.from("3000000000000000");
     const contractFee = BigNumber.from("50000000000000000"); //%5 - 0.05
     const amountOut = eth.mul(1);
