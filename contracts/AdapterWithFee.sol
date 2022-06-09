@@ -93,8 +93,108 @@ contract AdapterWithFee is Ownable {
         path0.safeTransfer(msg.sender, userTransfer);
     }
 
-    function _getFee(uint256 amount) private view returns (uint256 calculatedFee) {
-        calculatedFee = (amount * fee) / _FEE_DENOMINATOR;
+    /**
+     * @dev Swaps exact amount of native tokens to get minimum `amountOutMin` of tokens
+     * @param amountOutMin The minimum amount of token that swapper willing to get
+     * @param path The path that swap function is going to follow, first element should be input token, last element output
+     * @param to The recipient of the tokens
+     * @param deadline The timestamp that transaction will be reverted
+     * @return amounts The input token amount and all subsequent output token amounts
+     */
+    function swapExactETHForTokens(
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external payable returns (uint256[] memory amounts) {
+        uint256 feeTransfer = _getFee(msg.value);
+        uint256 dexTransfer = msg.value - feeTransfer;
+
+        amounts = router.swapExactETHForTokens{ value: dexTransfer }(amountOutMin, path, to, deadline);
+    }
+
+    /**
+     * @dev Swaps maximum `amountInMax` amount of tokens to get exact `amountOut` of native tokens
+     * @param amountOut The exact amount of native token that swapper willing to get
+     * @param amountInMax The maximum amount of token that swapper willing to send
+     * @param path The path that swap function is going to follow, first element should be input token, last element output
+     * @param to The recipient of the tokens
+     * @param deadline The timestamp that transaction will be reverted
+     * @return amounts The input token amount and all subsequent output token amounts
+     */
+    function swapTokensForExactETH(
+        uint256 amountOut,
+        uint256 amountInMax,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts) {
+        IERC20 path0 = IERC20(path[0]);
+
+        path0.safeTransferFrom(msg.sender, address(this), amountInMax);
+
+        // to get amount without fee (so amount * 1) / (1 + fee) ex(%5 fee) amount / 1.05
+        uint256 amountToSendRouter = (amountInMax * _FEE_DENOMINATOR) / (_FEE_DENOMINATOR + fee);
+
+        path0.approve(address(router), amountToSendRouter);
+        amounts = router.swapTokensForExactETH(amountOut, amountToSendRouter, path, to, deadline);
+
+        uint256 feeTransfer = _getFee(amounts[0]);
+        uint256 userTransfer = amountInMax - (amounts[0] + feeTransfer);
+
+        path0.safeTransfer(msg.sender, userTransfer);
+    }
+
+    /**
+     * @dev Swaps exact `amountIn` amount of tokens to get minimum `amountOutMin` of native tokens
+     * @param amountIn The exact amount of token that swapper willing to send
+     * @param amountOutMin The minimum amount of native token that swapper willing to get
+     * @param path The path that swap function is going to follow, first element should be input token, last element output
+     * @param to The recipient of the tokens
+     * @param deadline The timestamp that transaction will be reverted
+     * @return amounts The input token amount and all subsequent output token amounts
+     */
+    function swapExactTokensForETH(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts) {
+        IERC20 path0 = IERC20(path[0]);
+
+        path0.safeTransferFrom(msg.sender, address(this), amountIn);
+
+        uint256 feeTransfer = _getFee(amountIn);
+        uint256 dexTransfer = amountIn - feeTransfer;
+
+        path0.approve(address(router), dexTransfer);
+
+        amounts = router.swapExactTokensForETH(dexTransfer, amountOutMin, path, to, deadline);
+    }
+
+    /**
+     * @dev Swaps maximum amount of native tokens to get exact `amountOut` of tokens
+     * @param amountOut The exact amount of token that swapper willing to get
+     * @param path The path that swap function is going to follow, first element should be input token, last element output
+     * @param to The recipient of the tokens
+     * @param deadline The timestamp that transaction will be reverted
+     * @return amounts The input token amount and all subsequent output token amounts
+     */
+    function swapETHForExactTokens(
+        uint256 amountOut,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external payable returns (uint256[] memory amounts) {
+        // to get amount without fee (so amount * 1) / (1 + fee) ex(%5 fee) amount / 1.05
+        uint256 amountToSendRouter = (msg.value * _FEE_DENOMINATOR) / (_FEE_DENOMINATOR + fee);
+        amounts = router.swapETHForExactTokens{ value: amountToSendRouter }(amountOut, path, to, deadline);
+
+        uint256 feeTransfer = _getFee(amounts[0]);
+        uint256 userTransfer = msg.value - (amounts[0] + feeTransfer);
+
+        payable(msg.sender).transfer(userTransfer);
     }
 
     /**
@@ -121,5 +221,9 @@ contract AdapterWithFee is Ownable {
 
         uint256 feeTransfer = _getFee(amounts[0]);
         amounts[0] += feeTransfer;
+    }
+
+    function _getFee(uint256 amount) private view returns (uint256 calculatedFee) {
+        calculatedFee = (amount * fee) / _FEE_DENOMINATOR;
     }
 }
