@@ -1,6 +1,35 @@
-# Project Title
+# Dex Adapter
 
-Info about the project.
+Adapter for uniswap-v2 based dexes like uniswap and pancakeswap.
+The adapter also can be used to get fees using AdapterWithFee contract.
+Every time user makes a swap, fee is taken from user.
+Fee is set by admin and can be changed.
+
+Notes:
+Calculations saved under `calculations.pdf` and `calculations.txt`
+
+The project also has tasks for calculations and pair.
+
+To get pair of 2 tokens:
+
+```bash
+yarn pair --address ${IUniswapV2Factory address} --tokena ${first token} --tokenb ${second token} --network ${network}
+```
+
+To calculate output amount of tokens: (input token amount is 1 ETH amount of tokens by default)
+
+```bash
+yarn calculateoutput --pair ${pair address} --from ${token to sell (input token)} --network rinkeby
+```
+
+Note: --from should be either 0 or one 0 is tokena, 1 is tokenb
+(This information can be get from UniswapV2Pair pair address, so first get pair address then see tokena and tokenb, 0 is tokena)
+
+To calculate input amount of tokens: (output token amount is 1 ETH amount of tokens by default)
+
+```bash
+yarn calculateinput --pair ${pair address} --from ${token to sell (input token)} --network rinkeby
+```
 
 ## Installation
 

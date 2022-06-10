@@ -1,0 +1,23 @@
+All of the values are example, input your own values for calculation
+
+
+# Method A
+
+fee = 0.003;
+amount_traded = 20000000000000000000;
+amountInWithFee = amount_traded * (1 - fee);
+reserve_a_initial = 255016255562386314146;
+reserve_b_initial = 1322930370691397494;
+constant_product = reserve_a_initial * reserve_b_initial;
+reserve_b_after_execution = constant_product / (reserve_a_initial + amountInWithFee);
+amountOut = reserve_b_initial - reserve_b_after_execution;
+market_price = amountInWithFee / amountOut;
+mid_price = reserve_a_initial / reserve_b_initial;
+price_impact = 1 - (mid_price / market_price);
+
+to find amount in: (amount out is needed)
+amountOut = 1000000000000000000;
+reserve_a_initial = 233193523055893600351;
+reserve_b_initial = 1446342558260924487;
+fee = 0.003;
+amountIn = (amountOut * reserve_a_initial) / ((amountOut - reserve_b_initial) * (fee - 1))
