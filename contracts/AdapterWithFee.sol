@@ -33,6 +33,12 @@ contract AdapterWithFee is Ownable {
         tokenContract.safeTransfer(msg.sender, availableAmount);
     }
 
+    function withdrawFeesNative() external onlyOwner {
+        uint256 amount = address(this).balance;
+
+        payable(msg.sender).transfer(amount);
+    }
+
     /**
      * @dev Swaps exact `amountIn` amount of tokens to get minimum `amountOutMin` of tokens
      * @param amountIn The exact amount of token that swapper willing to send
